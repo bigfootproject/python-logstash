@@ -32,8 +32,7 @@ class LogstashFormatterBase(logging.Formatter):
 #            'msecs', 'msecs', 'message', 'msg', 'name', 'pathname', 'process',
 #            'processName', 'relativeCreated', 'thread', 'threadName', 'extra')
 
-        if record.processName == "MainProcess":
-#            record.processName = os.path.basename(inspect.stack()[-1][1])
+        if record.processName =="MainProcess":
             record.processName = os.path.basename(sys.argv[0])
 
         if sys.version_info < (3, 0):
