@@ -1,7 +1,9 @@
 import traceback
+import inspect
 import logging
 import socket
 import sys
+import os
 from datetime import datetime
 try:
     import json
@@ -23,11 +25,14 @@ class LogstashFormatterBase(logging.Formatter):
     def get_extra_fields(self, record):
         # The list contains all the attributes listed in
         # http://docs.python.org/library/logging.html#logrecord-attributes
-        skip_list = (
-            'args', 'asctime', 'created', 'exc_info', 'exc_text', 'filename',
-            'funcName', 'id', 'levelname', 'levelno', 'lineno', 'module',
-            'msecs', 'msecs', 'message', 'msg', 'name', 'pathname', 'process',
-            'processName', 'relativeCreated', 'thread', 'threadName', 'extra')
+#        skip_list = (
+#            'args', 'asctime', 'created', 'exc_info', 'exc_text', 'filename',
+#            'funcName', 'id', 'levelname', 'levelno', 'lineno', 'module',
+#            'msecs', 'msecs', 'message', 'msg', 'name', 'pathname', 'process',
+#            'processName', 'relativeCreated', 'thread', 'threadName', 'extra')
+
+        if record.processName =="MainProcess":
+            record.processName = os.path.basename(inspect.stack()[-1][1])
 
         if sys.version_info < (3, 0):
             easy_types = (basestring, bool, dict, float, int, list, type(None))
@@ -37,11 +42,11 @@ class LogstashFormatterBase(logging.Formatter):
         fields = {}
 
         for key, value in record.__dict__.items():
-            if key not in skip_list:
-                if isinstance(value, easy_types):
-                    fields[key] = value
-                else:
-                    fields[key] = repr(value)
+#            if key not in skip_list:
+            if isinstance(value, easy_types):
+                fields[key] = value
+            else:
+                fields[key] = repr(value)
 
         return fields
 
