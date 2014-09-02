@@ -25,14 +25,16 @@ class LogstashFormatterBase(logging.Formatter):
     def get_extra_fields(self, record):
         # The list contains all the attributes listed in
         # http://docs.python.org/library/logging.html#logrecord-attributes
-#        skip_list = (
+        skip_list = ('args', 'extra', 'exc_info', 'lineno', 'funcName',
+                     'filename', 'msecs', 'msg', 'levelname')
 #            'args', 'asctime', 'created', 'exc_info', 'exc_text', 'filename',
 #            'funcName', 'id', 'levelname', 'levelno', 'lineno', 'module',
 #            'msecs', 'msecs', 'message', 'msg', 'name', 'pathname', 'process',
 #            'processName', 'relativeCreated', 'thread', 'threadName', 'extra')
 
-        if record.processName =="MainProcess":
-            record.processName = os.path.basename(inspect.stack()[-1][1])
+        if record.processName == "MainProcess":
+#            record.processName = os.path.basename(inspect.stack()[-1][1])
+            record.processName = os.path.basename(sys.argv[0])
 
         if sys.version_info < (3, 0):
             easy_types = (basestring, bool, dict, float, int, list, type(None))
@@ -42,11 +44,11 @@ class LogstashFormatterBase(logging.Formatter):
         fields = {}
 
         for key, value in record.__dict__.items():
-#            if key not in skip_list:
-            if isinstance(value, easy_types):
-                fields[key] = value
-            else:
-                fields[key] = repr(value)
+            if key not in skip_list:
+                if isinstance(value, easy_types):
+                    fields[key] = value
+                else:
+                    fields[key] = repr(value)
 
         return fields
 
@@ -54,17 +56,8 @@ class LogstashFormatterBase(logging.Formatter):
         fields = {
             'exc_info': self.format_exception(record.exc_info),
             'lineno': record.lineno,
-            'process': record.process,
-            'threadName': record.threadName,
+            'funcName': record.funcName,
         }
-
-        # funcName was added in 2.5
-        if not getattr(record, 'funcName', None):
-            fields['funcName'] = record.funcName
-
-        # processName was added in 2.6
-        if not getattr(record, 'processName', None):
-            fields['processName'] = record.processName
 
         return fields
 
@@ -137,10 +130,8 @@ class LogstashFormatterVersion1(LogstashFormatterBase):
         }
 
         # Add extra fields
-        message.update(self.get_extra_fields(record))
+        message['extra'] = self.get_extra_fields(record)
 
-        # If exception, add debug info
-        if record.exc_info:
-            message.update(self.get_debug_fields(record))
+        message['debug'] = self.get_debug_fields(record)
 
         return self.serialize(message)
