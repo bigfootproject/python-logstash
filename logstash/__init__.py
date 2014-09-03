@@ -3,11 +3,10 @@ from logstash.formatter import LogstashFormatterVersion0, LogstashFormatterVersi
 
 from logstash.handler_tcp import TCPLogstashHandler
 from logstash.handler_udp import UDPLogstashHandler, LogstashHandler
-try:
-    from logstash.handler_amqp import AMQPLogstashHandler
-except:
-   # you need to install AMQP support to enable this handler.
-   pass
- 
 
-
+def swift_setup(conf, name, log_to_console, log_route, fmt, logger,
+                adapted_logger):
+    log_server = open("/etc/swift/log_server.conf").read()
+    ip, port = log_server.split("|")
+    my_handler = UDPLogstashHandler(ip, port, version=1)
+    logger.addHandler(my_handler)
