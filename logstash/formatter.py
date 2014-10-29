@@ -1,5 +1,4 @@
 import traceback
-import inspect
 import logging
 import socket
 import sys
@@ -26,7 +25,7 @@ class LogstashFormatterBase(logging.Formatter):
         # The list contains all the attributes listed in
         # http://docs.python.org/library/logging.html#logrecord-attributes
         skip_list = ('args', 'extra', 'exc_info', 'lineno', 'funcName',
-                     'filename', 'msecs', 'msg', 'levelname')
+                     'filename', 'msecs', 'msg', 'levelname', 'timestamp')
 #            'args', 'asctime', 'created', 'exc_info', 'exc_text', 'filename',
 #            'funcName', 'id', 'levelname', 'levelno', 'lineno', 'module',
 #            'msecs', 'msecs', 'message', 'msg', 'name', 'pathname', 'process',
